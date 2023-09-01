@@ -98,7 +98,7 @@ const userConfig = {
                 },
                 'semanticHighlighting.enabled': true,
                 'editor.semanticHighlighting.enabled': true,
-                theme: 'vs-dark',
+                theme: 'vs',
             },
             languageDef: monarchGrammar,
             languageExtensionConfig: {
