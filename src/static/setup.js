@@ -100,7 +100,7 @@ const userConfig = {
                 'editor.semanticHighlighting.enabled': true,
                 theme: 'vs-dark',
             },
-            //languageDef: monarchGrammar,
+            languageDef: monarchGrammar,
             languageExtensionConfig: {
                 id: languageId,
                 extensions: ['.hello'],
