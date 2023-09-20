@@ -7,19 +7,21 @@ export class HelloSemanticTokenProvider extends AbstractSemanticTokenProvider {
         console.log("mimimimi3")
         if (node.$cstNode !== undefined && node.$container === undefined) {
             flattenCst(node.$cstNode).forEach ((cst) =>{
-                console.log("HelloSemanticTokenProvider", cst.tokenType.name)
+                
                 if (isKeyword(cst.feature) && "person" !== cst.feature.value) {
+                    console.log("HelloSemanticTokenProvider", cst.tokenType.name)
                     acceptor({
                         node: cst.element,
                         keyword: cst.feature.value,
                         type: SemanticTokenTypes.keyword
                     })
                 } else if (isLeafCstNode(cst) && "ML_COMMENT" == cst.tokenType.name) {
-                    console.log("comment found");
-                    acceptor({
-                        cst: cst,
-                        type: SemanticTokenTypes.comment
-                    })
+                    // console.log("HelloSemanticTokenProvider", cst.tokenType.name)
+                    // console.log("comment found");
+                    // acceptor({
+                    //     cst: cst,
+                    //     type: SemanticTokenTypes.comment
+                    // })
                 }
             })
         }
