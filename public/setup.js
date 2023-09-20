@@ -34,26 +34,20 @@ const monarchGrammar = {
 
     // tokenizer itself, starts at the first 'state' (entry), which happens to be 'initial'
     tokenizer: {
-        // initial tokenizer state
         initial: [
-            { regex: /#(\d|[a-fA-F])+/, action: {"token":"string"} },
-            { regex: /[_a-zA-Z][\w_]*/, action: { cases: { '@keywords': {"token":"keyword"}, '@default': {"token":"string"} }} },
-            { regex: /-?[0-9]+/, action: {"token":"number"} },
-            // inject the rules for the 'whitespace' state here, effectively inlined
+            { regex: /[_a-zA-Z][\w_]*/, action: { cases: { '@keywords': {"token":"keyword"}, '@default': {"token":"ID"} }} },
+            { regex: /[0-9]+/, action: {"token":"number"} },
+            { regex: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/, action: {"token":"string"} },
             { include: '@whitespace' },
             { regex: /@symbols/, action: { cases: { '@operators': {"token":"operator"}, '@default': {"token":""} }} },
         ],
-        // state for parsing whitespace
         whitespace: [
             { regex: /\s+/, action: {"token":"white"} },
-            // for this rule, if we match, push up the next state as 'comment', advancing to the set of rules below
             { regex: /\/\*/, action: {"token":"comment","next":"@comment"} },
             { regex: /\/\/[^\n\r]*/, action: {"token":"comment"} },
         ],
-        // state for parsing a comment
         comment: [
             { regex: /[^\/\*]+/, action: {"token":"comment"} },
-            // done with this comment, pop the current state & roll back to the previous one
             { regex: /\*\//, action: {"token":"comment","next":"@pop"} },
             { regex: /[\/\*]/, action: {"token":"comment"} },
         ],
