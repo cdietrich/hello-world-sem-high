@@ -1,6 +1,114 @@
-import { MonacoEditorLanguageClientWrapper } from 'monaco-editor-wrapper';
-const client = new MonacoEditorLanguageClientWrapper();
-// const userConfig = {
+import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
+import { buildWorkerDefinition } from "monaco-editor-workers";
+//import { buildWorkerDefinition } from "monaco-editor-workers";
 
-// }
-client.dispose()
+buildWorkerDefinition('./monaco-editor-workers/dist/workers', window.location.origin, false)
+
+const languageId = 'hello';
+
+const workerURL = new URL('./hello-world-server-worker.js', window.location.origin);
+const lsWorker = new Worker(workerURL.href, {
+    type: 'classic',
+    name: 'hello-world-language-server-worker'
+});
+
+// setup the language client config with the worker
+const languageClientConfig = {
+    options: {
+        $type: 'WorkerDirect' as const,
+        worker: lsWorker
+    }
+};
+
+const monarchGrammar = {
+    // recognized keywords
+    keywords: [
+        'color','def','down','for','move','pen','to','up'
+    ],
+    // recognized operators
+    operators: [
+        '-',',','*','/','+','='
+    ],
+    // pattern for symbols we want to highlight
+    symbols:  /-|,|\(|\)|\{|\}|\*|\/|\+|=/,
+
+    // tokenizer itself, starts at the first 'state' (entry), which happens to be 'initial'
+    tokenizer: {
+        // initial tokenizer state
+        initial: [
+            { regex: /#(\d|[a-fA-F])+/, action: {"token":"string"} },
+            { regex: /[_a-zA-Z][\w_]*/, action: { cases: { '@keywords': {"token":"keyword"}, '@default': {"token":"string"} }} },
+            { regex: /-?[0-9]+/, action: {"token":"number"} },
+            // inject the rules for the 'whitespace' state here, effectively inlined
+            { include: '@whitespace' },
+            { regex: /@symbols/, action: { cases: { '@operators': {"token":"operator"}, '@default': {"token":""} }} },
+        ],
+        // state for parsing whitespace
+        whitespace: [
+            { regex: /\s+/, action: {"token":"white"} },
+            // for this rule, if we match, push up the next state as 'comment', advancing to the set of rules below
+            { regex: /\/\*/, action: {"token":"comment","next":"@comment"} },
+            { regex: /\/\/[^\n\r]*/, action: {"token":"comment"} },
+        ],
+        // state for parsing a comment
+        comment: [
+            { regex: /[^\/\*]+/, action: {"token":"comment"} },
+            // done with this comment, pop the current state & roll back to the previous one
+            { regex: /\*\//, action: {"token":"comment","next":"@pop"} },
+            { regex: /[\/\*]/, action: {"token":"comment"} },
+        ],
+    }
+};
+
+// keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
+// create a client wrapper
+const client = new MonacoEditorLanguageClientWrapper();
+// start the editor
+// keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
+let codeMain = `Hello A1!
+Hello B1!
+person MyP
+Hello MyP! /*test*/`;
+
+
+const userConfig : UserConfig = {
+    htmlElement: document.getElementById('monaco-editor-root')!,
+    wrapperConfig: {
+        serviceConfig: {
+            // enable quick access "F1" and add required keybindings service
+            //enableQuickaccessService: true,
+            enableKeybindingsService: true,
+            enableThemeService: false,
+            enableTextmateService: false,
+            enableLanguagesService: true,
+            debugLogging: true
+        },
+        editorAppConfig: {
+            $type: 'classic' as const,
+            languageId: languageId,
+            code: codeMain,
+            useDiffEditor: false,
+            editorOptions: {
+                glyphMargin: true,
+                guides: {
+                    bracketPairs: true
+                },
+                lightbulb: {
+                    enabled: true
+                },
+                "semanticHighlighting.enabled": true,
+                // 'semanticHighlighting.enabled': true,
+                // 'editor.semanticHighlighting.enabled': true,
+                theme: 'vs-dark',
+            },
+            languageDef: monarchGrammar,
+            languageExtensionConfig: {
+                id: languageId,
+                extensions: ['.hello'],
+                aliases: ['HELLO', 'hello']
+            }
+        }
+    },
+    languageClientConfig: languageClientConfig
+};
+client.start(userConfig);

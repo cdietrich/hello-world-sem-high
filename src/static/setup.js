@@ -75,12 +75,14 @@ const userConfig = {
     htmlElement: document.getElementById('monaco-editor-root'),
     wrapperConfig: {
         serviceConfig: {
-            // enable quick access "F1" and add required keybindings service
-            enableQuickaccessService: true,
-            enableKeybindingsService: true,
-            enableThemeService: true,
-            enableTextmateService: true,
+            enableModelService: true,
+            configureEditorOrViewsService: {
+            },
+            configureConfigurationService: {
+                defaultWorkspaceUri: '/tmp/'
+            },
             enableLanguagesService: true,
+            enableKeybindingsService: true,
             debugLogging: true
         },
         editorAppConfig: {
@@ -88,23 +90,18 @@ const userConfig = {
             languageId: languageId,
             code: codeMain,
             useDiffEditor: false,
+            // configure it like this or in the userConfiguration
             editorOptions: {
-                glyphMargin: true,
-                guides: {
-                    bracketPairs: true
-                },
-                lightbulb: {
-                    enabled: true
-                },
-                'semanticHighlighting.enabled': true,
-                'editor.semanticHighlighting.enabled': true,
-                theme: 'vs',
+                'semanticHighlighting.enabled': true
             },
+            languageExtensionConfig: { id: 'langium' },
             languageDef: monarchGrammar,
-            languageExtensionConfig: {
-                id: languageId,
-                extensions: ['.hello'],
-                aliases: ['HELLO', 'hello']
+            // themeData: LangiumTheme,
+            // theme: 'langium-theme',
+            userConfiguration: {
+                // or configure the semantic highlighting like this:
+                // `{ json: "editor.semanticHighlighting.enabled": true }`
+                json: '{}'
             }
         }
     },
