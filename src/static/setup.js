@@ -1,4 +1,4 @@
-import { MonacoEditorLanguageClientWrapper } from './monaco-editor-wrapper/index.js';
+import { MonacoEditorLanguageClientWrapper } from './monaco-editor-wrapper/bundle/index.js';
 import { buildWorkerDefinition } from "./monaco-editor-workers/index.js";
 //import { buildWorkerDefinition } from "monaco-editor-workers";
 
@@ -101,7 +101,7 @@ const userConfig = {
             userConfiguration: {
                 // or configure the semantic highlighting like this:
                 // `{ json: "editor.semanticHighlighting.enabled": true }`
-                json: '{}'
+                json: '{"editor.semanticHighlighting.enabled": true}'
             }
         }
     },
