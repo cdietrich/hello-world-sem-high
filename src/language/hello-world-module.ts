@@ -5,6 +5,7 @@ import {
 import { HelloWorldGeneratedModule, HelloWorldGeneratedSharedModule } from './generated/module';
 import { HelloWorldValidator, registerValidationChecks } from './hello-world-validator';
 import { HelloSemanticTokenProvider } from './hello-semantic-tokens';
+import { HelloWorldDocumentBuilder } from './hello-document-builder';
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -56,7 +57,12 @@ export function createHelloWorldServices(context: DefaultSharedModuleContext): {
 } {
     const shared = inject(
         createDefaultSharedModule(context),
-        HelloWorldGeneratedSharedModule
+        HelloWorldGeneratedSharedModule,
+        {
+            workspace: {
+                DocumentBuilder: (services) => new HelloWorldDocumentBuilder(services)
+            }
+        }
     );
     const HelloWorld = inject(
         createDefaultModule({ shared }),
